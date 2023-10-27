@@ -20,6 +20,11 @@ brew install portaudio
 ## Permissions
 The app requires accessibility permissions to register global hotkeys and permission to access your microphone for speech recognition.
 
+For example, if you launch the app from MacOS terminal, you need to grant permission at Settings > Privacy & Security > Microphone
+and Input Monitoring
+
+![macos > settings > privacy security > microphone](macos-privacy-security-microphone.png)
+
 ## Installation
 Clone the repository:
 
