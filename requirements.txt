@@ -7,6 +7,6 @@ pyaudio
 pynput
 keyboard
 argparse
-rumps
+transitions
 numpy
 faster-whisper

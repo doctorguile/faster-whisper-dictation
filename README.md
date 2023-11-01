@@ -7,14 +7,16 @@ Multilingual dictation app based on the Faster Whisper to provide accurate and e
 ## Quick start
 1. Run the app, switch to another application that accepts text input (editor, browser textarea, etc)
 2. Use the key combination to toggle dictation.
-(Default to double-triggering right-cmd on macOS and ctrl+alt on other platforms).
-3. Say what you want to type, when done, use the same key combo (single click right-cmd on macOS and ctrl+alt on other platforms) to stop dictation and the app will transcribe and auto type the words on your behalf.
+Default to double-tapping right-cmd on macOS, right-super on Linux and Win+Z on Windows.
+3. Say what you want to type, when done, use the same key combo to stop dictation and the app will transcribe and auto type the words on your behalf.
 
 ## Prerequisites
 The PortAudio library is required for this app to work. You can install it on macOS using the following command:
 
 ```bash
-brew install portaudio
+brew install portaudio             # on MacOS
+
+sudo apt install portaudio19-dev   # on Debian/Ubuntu Linux
 ```
 
 ## Permissions
@@ -37,36 +39,65 @@ Create a virtual environment:
 
 ```bash
 python3 -m venv venv
-source venv/bin/activate
+
+source venv/bin/activate      # MacOS / Linux
+
+venv\scripts\activate.bat     # Windows cmd.exe
+
 ```
 
 Install the required packages:
 
 ```bash
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 ## Usage
+
+By default, the app uses the "base" model. You can change the model and specify a different key combination using command-line arguments.
+
 Run the application:
 
 ```bash
-python dictation.py
+python3 dictation.py -m small --key-combo="<ctrl>+<alt>+y"
 ```
 
-By default, the app uses the "base" model and the key combination to toggle dictation is double click right cmd on macOS and ctrl+alt on other platforms. You can change the model and the key combination using command-line arguments.
-
-You can check faster-whisper documentation for latest supported models: tiny, tiny.en, base, base.en, small, small.en, medium, medium.en, large-v1, large-v2, or large
-
-
+## Options
 ```bash
-python dictation.py -m large -k cmd_r+shift
+
+python3 dictation.py [-h] [-m MODEL_NAME] [-k KEY_COMBO] [-d DOUBLE_KEY] [-t MAX_TIME] [-v DEVICE] [-c COMPUTE_TYPE]
+
+  -h, --help            show this help message and exit
+  -m MODEL_NAME, --model-name MODEL_NAME
+                        Size of the model to use (tiny, tiny.en, base, base.en, small, small.en, medium, medium.en, large-v1,
+                        large-v2, or large). A path to a converted model directory, or a CTranslate2-converted Whisper model ID from
+                        the Hugging Face Hub. When a size or a model ID is configured, the converted model is downloaded from the
+                        Hugging Face Hub. Default: base.
+  -k KEY_COMBO, --key-combo KEY_COMBO
+                        Specify the key combination to toggle the app. See
+                        https://pynput.readthedocs.io/en/latest/keyboard.html#pynput.keyboard.Key for a list of keys supported.
+                        Examples: <cmd_l>+<alt>+x , <ctrl>+<alt>+a. Note on windows, the winkey is specified using <cmd>. Default:
+                        <win>+z on Windows (see below for MacOS and Linux defaults).
+  -d DOUBLE_KEY, --double-key DOUBLE_KEY
+                        If key-combo is not set, on macOS/linux the default behavior is double tapping a key to start recording. Tap
+                        the same key again to stop recording. On MacOS the key is Right Cmd and on Linux the key is Right Super
+                        (Right Win Key) You can set to a different key for double triggering.
+  -t MAX_TIME, --max-time MAX_TIME
+                        Specify the maximum recording time in seconds. The app will automatically stop recording after this duration.
+                        Default: 30 seconds.
+  -v DEVICE, --device DEVICE
+                        By default we use 'cpu' for inference. If you have supported GPU with proper driver and libraries installed,
+                        you can set it to 'auto' or 'cuda'.
+  -c COMPUTE_TYPE, --compute-type COMPUTE_TYPE
+                        If your GPU stack supports it, you can set compute-type to 'float32' or 'float16' to improve accuracy.
+                        Default 'int8'
 ```
 
-#### Replace macOS default dictation trigger key
-You can use this app to replace macOS built-in dictation. Trigger to begin recording with a double click of Right Command key and stop recording with a single click of Right Command key.
-```bash
-python whisper-dictation.py -m large --k_double_cmd 
-```
+
+
+## Replace macOS default dictation trigger key
+You can use this app to replace macOS built-in dictation. i.e. Double tap Right Cmd key to begin recording and stop recording with a single tap
+
 To use this trigger, go to System Settings -> Keyboard, disable Dictation. If you double click Right Command key on any text field, macOS will ask whether you want to enable Dictation, so select Don't Ask Again.
 
 ## Setting the App as a Startup Item
