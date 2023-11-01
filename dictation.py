@@ -205,7 +205,7 @@ class App():
     def start(self):
         if self.m.is_READY():
             if self.args.max_time:
-                self.timer = threading.Timer(args.max_time, self.timer_stop)
+                self.timer = threading.Timer(self.args.max_time, self.timer_stop)
                 self.timer.start()
             self.m.start_recording()
             return True
