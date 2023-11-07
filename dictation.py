@@ -9,10 +9,18 @@ from faster_whisper import WhisperModel
 from pynput import keyboard
 from transitions import Machine
 
-def playback(audio):
-    import sounddevice as sd
-    sd.play(audio, samplerate=16000)
-    sd.wait()
+
+if platform.system() == 'Windows':
+    import winsound
+    def playsound(s):
+        # SND_ASYNC winsound cannot play asynchronously from memory
+        winsound.PlaySound(s, winsound.SND_MEMORY)
+else:
+    import sounddevice # or pygame.mixer, py-simple-audio
+    def playsound(s):
+        sounddevice.play(s) # samplerate=16000
+        sounddevice.wait()
+
 
 class SpeechTranscriber:
     def __init__(self, callback, model_size='base', device='cpu', compute_type="int8"):
@@ -202,8 +210,20 @@ class App():
         m.on_enter_TRANSCRIBING(self.transcriber.transcribe)
         m.on_enter_REPLAYING(self.replayer.replay)
 
+        self.SOUND_EFFECTS = {}
+        # https://freesound.org/people/MATRIXXX_/
+        with open("assets/granted-04.wav", "rb") as f: 
+            self.SOUND_EFFECTS["start_recording"] = f.read()
+        # https://freesound.org/people/leviclaassen/sounds/107786/
+        with open("assets/beepbeep.wav", "rb") as f: 
+            self.SOUND_EFFECTS["finish_recording"] = f.read()
+
+    def beep(self, k):
+        playsound(self.SOUND_EFFECTS[k])
+
     def start(self):
         if self.m.is_READY():
+            self.beep("start_recording")
             if self.args.max_time:
                 self.timer = threading.Timer(self.args.max_time, self.timer_stop)
                 self.timer.start()
@@ -212,6 +232,7 @@ class App():
 
     def stop(self):
         if self.m.is_RECORDING():
+            self.beep("finish_recording")
             self.recorder.stop()
             if self.timer is not None:
                 self.timer.cancel()
