@@ -5,7 +5,6 @@ import argparse
 import platform
 import pyaudio
 import numpy as np
-import soundfile as sf
 from faster_whisper import WhisperModel
 from pynput import keyboard
 from transitions import Machine
@@ -17,13 +16,21 @@ if platform.system() == 'Windows':
     def playsound(s, wait=True):
         # SND_ASYNC winsound cannot play asynchronously from memory
         winsound.PlaySound(s, winsound.SND_MEMORY)
+    def loadwav(filename):
+        with open(filename, "rb") as f:
+            data = f.read()
+        return data            
 else:
+    import soundfile as sf
     import sounddevice # or pygame.mixer, py-simple-audio
     sounddevice.default.samplerate = 44100
     def playsound(s, wait=True):
         sounddevice.play(s) # samplerate=16000
         if wait:
             sounddevice.wait()
+    def loadwav(filename):
+        data, fs = sf.read(filename, dtype='float32')
+        return data            
 
 
 class SpeechTranscriber:
@@ -214,15 +221,12 @@ class App():
         m.on_enter_TRANSCRIBING(self.transcriber.transcribe)
         m.on_enter_REPLAYING(self.replayer.replay)
 
-        self.SOUND_EFFECTS = {}
-        # https://freesound.org/people/MATRIXXX_/
-        filename = "assets/granted-04.wav"
-        data, fs = sf.read(filename, dtype='float32')
-        self.SOUND_EFFECTS["start_recording"] = data
         # https://freesound.org/people/leviclaassen/sounds/107786/
-        filename = "assets/beepbeep.wav"
-        data, fs = sf.read(filename, dtype='float32')
-        self.SOUND_EFFECTS["finish_recording"] = data
+        # https://freesound.org/people/MATRIXXX_/
+        self.SOUND_EFFECTS = {
+            "start_recording": loadwav("assets/granted-04.wav"),
+            "finish_recording": loadwav("assets/beepbeep.wav")
+        }
 
     def beep(self, k, wait=True):
         # wait=True will block until the beeping sound finished playing before continue to start recording
@@ -241,10 +245,10 @@ class App():
 
     def stop(self):
         if self.m.is_RECORDING():
-            self.beep("finish_recording", wait=False)
             self.recorder.stop()
             if self.timer is not None:
                 self.timer.cancel()
+            self.beep("finish_recording", wait=False)
             return True
 
     def timer_stop(self):
