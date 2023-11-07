@@ -11,3 +11,4 @@ transitions
 numpy
 faster-whisper
 sounddevice; sys.platform != 'win32'
+soundfile
