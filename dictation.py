@@ -102,10 +102,12 @@ class KeyboardReplayer():
                     is_first = False
                     continue
                 try:
+                    print(element, end='')
                     self.kb.type(element)
                     time.sleep(0.0025)
                 except:
                     pass
+        print('')
         self.callback()
 
 
